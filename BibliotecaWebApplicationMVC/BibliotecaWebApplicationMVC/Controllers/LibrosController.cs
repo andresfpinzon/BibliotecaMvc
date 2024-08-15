@@ -235,19 +235,25 @@ namespace BibliotecaWebApplicationMVC.Controllers
             return View(libro);
         }
 
-        // POST: Libros/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(Guid id)
         {
             var libro = await _context.Libros
                 .Include(l => l.AutorLibros)
+                .Include(l => l.Publicacion) // Incluye la Publicacion asociada
                 .FirstOrDefaultAsync(l => l.LibroId == id);
 
             if (libro != null)
             {
                 // Eliminar relaciones en AutorLibro
                 _context.AutorLibros.RemoveRange(libro.AutorLibros);
+
+                // Eliminar la publicacion asociada
+                if (libro.Publicacion != null)
+                {
+                    _context.Publicaciones.Remove(libro.Publicacion);
+                }
 
                 // Eliminar el libro
                 _context.Libros.Remove(libro);
@@ -256,6 +262,7 @@ namespace BibliotecaWebApplicationMVC.Controllers
 
             return RedirectToAction(nameof(Index));
         }
+
 
 
         // Método para crear un nuevo autor
