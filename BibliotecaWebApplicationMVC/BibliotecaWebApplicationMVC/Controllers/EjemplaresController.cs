@@ -61,7 +61,7 @@ namespace BibliotecaWebApplicationMVC.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("EjemplarId,PublicacionId,EstanteId")] Ejemplar ejemplar)
         {
-            if (ModelState.IsValid)
+            //if (ModelState.IsValid)
             {
                 _context.Add(ejemplar);
                 await _context.SaveChangesAsync();

@@ -65,6 +65,23 @@
                         @if (User.Identity.IsAuthenticated)
                         {
                             var user = await UserManager.GetUserAsync(User);
+                            if (user != null && (await UserManager.IsInRoleAsync(user, "Bibliotecario") || await UserManager.IsInRoleAsync(user, "Administrador")))
+                            {
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle text-dark" href="#" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        Gestionar Estanterias
+                                    </a>
+                                    <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                                        <li><a class="dropdown-item" asp-area="" asp-controller="Estanterias" asp-action="Index"> Estanterias</a></li>
+                                        <li><a class="dropdown-item" asp-area="" asp-controller="Estantes" asp-action="Index"> Estantes</a></li>
+                                        <li><a class="dropdown-item" asp-area="" asp-controller="Ejemplares" asp-action="Index"> Ejemplares</a></li>
+                                    </ul>
+                                </li>
+                            }
+                        }
+                        @if (User.Identity.IsAuthenticated)
+                        {
+                            var user = await UserManager.GetUserAsync(User);
                             if (user != null && (await UserManager.IsInRoleAsync(user, "Root") || await UserManager.IsInRoleAsync(user, "Administrador")))
                             {
                                 <li class="nav-item dropdown">
