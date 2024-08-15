@@ -48,7 +48,6 @@ namespace BibliotecaWebApplicationMVC.Controllers
         // GET: Revistas/Create
         public IActionResult Create()
         {
-            ViewData["PublicacionId"] = new SelectList(_context.Publicaciones, "PublicacionId", "PublicacionId");
             return View();
         }
 
@@ -57,16 +56,30 @@ namespace BibliotecaWebApplicationMVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("RevistaId,Numero,Nombre,FechaPublicacion,PublicacionId")] Revista revista)
+        public async Task<IActionResult> Create([Bind("RevistaId,Numero,Nombre,FechaPublicacion")] Revista revista)
         {
-            if (ModelState.IsValid)
+            //if (ModelState.IsValid)
             {
+                // Crear una nueva publicación
+                var publicacion = new Publicacion
+                {
+                    PublicacionId = Guid.NewGuid()
+                };
+
+                // Guardar la publicación
+                _context.Publicaciones.Add(publicacion);
+                await _context.SaveChangesAsync();
+
+                // Asignar la publicación a la revista
+                revista.PublicacionId = publicacion.PublicacionId;
                 revista.RevistaId = Guid.NewGuid();
+
+                // Guardar la revista
                 _context.Add(revista);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["PublicacionId"] = new SelectList(_context.Publicaciones, "PublicacionId", "PublicacionId", revista.PublicacionId);
+
             return View(revista);
         }
 
@@ -78,32 +91,49 @@ namespace BibliotecaWebApplicationMVC.Controllers
                 return NotFound();
             }
 
-            var revista = await _context.Revistas.FindAsync(id);
+            var revista = await _context.Revistas
+                .Include(r => r.Publicacion)
+                .FirstOrDefaultAsync(m => m.RevistaId == id);
+
             if (revista == null)
             {
                 return NotFound();
             }
-            ViewData["PublicacionId"] = new SelectList(_context.Publicaciones, "PublicacionId", "PublicacionId", revista.PublicacionId);
+
+            ViewData["PublicacionId"] = new SelectList(_context.Publicaciones, "PublicacionId", "Nombre", revista.PublicacionId);
             return View(revista);
         }
+
 
         // POST: Revistas/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Guid id, [Bind("RevistaId,Numero,Nombre,FechaPublicacion,PublicacionId")] Revista revista)
+        public async Task<IActionResult> Edit(Guid id, [Bind("RevistaId,Numero,Nombre,FechaPublicacion")] Revista revista)
         {
             if (id != revista.RevistaId)
             {
                 return NotFound();
             }
 
-            if (ModelState.IsValid)
+            //if (ModelState.IsValid)
             {
                 try
                 {
-                    _context.Update(revista);
+                    var revistaFromDb = await _context.Revistas
+                        .Include(r => r.Publicacion) // Include related Publicacion
+                        .FirstOrDefaultAsync(r => r.RevistaId == id);
+
+                    if (revistaFromDb == null)
+                    {
+                        return NotFound();
+                    }
+                    revistaFromDb.Numero = revista.Numero;
+                    revistaFromDb.Nombre = revista.Nombre;
+                    revistaFromDb.FechaPublicacion = revista.FechaPublicacion;
+
+                    _context.Update(revistaFromDb);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
@@ -119,9 +149,10 @@ namespace BibliotecaWebApplicationMVC.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["PublicacionId"] = new SelectList(_context.Publicaciones, "PublicacionId", "PublicacionId", revista.PublicacionId);
+            ViewData["PublicacionId"] = new SelectList(_context.Publicaciones, "PublicacionId", "Nombre", revista.PublicacionId);
             return View(revista);
         }
+
 
         // GET: Revistas/Delete/5
         public async Task<IActionResult> Delete(Guid? id)
@@ -142,20 +173,30 @@ namespace BibliotecaWebApplicationMVC.Controllers
             return View(revista);
         }
 
-        // POST: Revistas/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(Guid id)
         {
-            var revista = await _context.Revistas.FindAsync(id);
+            var revista = await _context.Revistas
+                .Include(r => r.Publicacion)
+                .FirstOrDefaultAsync(r => r.RevistaId == id);
+
             if (revista != null)
             {
+                // Eliminar la publicación asociada
+                if (revista.Publicacion != null)
+                {
+                    _context.Publicaciones.Remove(revista.Publicacion);
+                }
+
+                // Eliminar la revista
                 _context.Revistas.Remove(revista);
+                await _context.SaveChangesAsync();
             }
 
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
+
 
         private bool RevistaExists(Guid id)
         {
