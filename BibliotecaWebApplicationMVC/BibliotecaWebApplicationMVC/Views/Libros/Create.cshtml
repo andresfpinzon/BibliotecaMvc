@@ -1,49 +1,4 @@
-﻿@* @model BibliotecaWebApplicationMVC.Models.Libro
-
-@{
-    ViewData["Title"] = "Create";
-}
-
-<h1>Crear</h1>
-
-<h4>Libro</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="ISBN" class="control-label"></label>
-                <input asp-for="ISBN" class="form-control" />
-                <span asp-validation-for="ISBN" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Titulo" class="control-label"></label>
-                <input asp-for="Titulo" class="form-control" />
-                <span asp-validation-for="Titulo" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="NumeroPaginas" class="control-label"></label>
-                <input asp-for="NumeroPaginas" class="form-control" />
-                <span asp-validation-for="NumeroPaginas" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <button type="submit" class="btn btn-create"><i class="fas fa-save"></i> Guardar</button>
-                <a asp-action="Index" class="btn btn-back"><i class="fas fa-arrow-left"></i> Volver</a>
-            </div>
-        </form>
-    </div>
-</div>
-
-
-@section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-}
- *@
-
-
-
-@model BibliotecaWebApplicationMVC.Models.Libro
+﻿@model BibliotecaWebApplicationMVC.Models.Libro
 
 @{
     ViewData["Title"] = "Crear Libro";
@@ -69,21 +24,25 @@
                 <span asp-validation-for="Titulo" class="text-danger"></span>
             </div>
             <div class="form-group">
+                <label asp-for="Formato" class="control-label"></label>
+                <input asp-for="Formato" class="form-control" />
+                <span asp-validation-for="Formato" class="text-danger"></span>
+            </div>
+            <div class="form-group">
                 <label asp-for="NumeroPaginas" class="control-label"></label>
                 <input asp-for="NumeroPaginas" class="form-control" />
                 <span asp-validation-for="NumeroPaginas" class="text-danger"></span>
             </div>
+
             <div class="form-group">
-                <label class="control-label" >Seleccionar Autor</label>
-                <select name="Autor" class="form-control">
-                    <option value="">Seleccione un autor</option>
-                    <option value="1">Gabriel García Márquez</option>
-                    <option value="2">Laura Restrepo</option>
-                    <option value="3">Tomas Carrasquilla</option>
-                    <option value="4">Edgar Allan Poe</option>
+                <label class="control-label">Seleccionar Autor(es)</label>
+                <select id="selectedAutores" name="selectedAutores" class="form-control" multiple>
+                    @foreach (var autor in ViewBag.Autores)
+                    {
+                        <option value="@autor.AutorId">@autor.Nombres @autor.Apellidos</option>
+                    }
                 </select>
                 <br />
-                <span class="text-danger"></span>
                 <button type="button" class="btn btn-create" data-toggle="modal" data-target="#crearAutorModal"><i class="fas fa-save"></i> Crear Autor</button>
             </div>
             <br />
@@ -94,7 +53,7 @@
         </form>
     </div>
 </div>
-<br />
+
 <div class="modal fade" id="crearAutorModal" tabindex="-1" role="dialog" aria-labelledby="crearAutorModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -105,18 +64,18 @@
                 </button>
             </div>
             <div class="modal-body">
-                <form id="crearAutorForm">
+                <form id="crearAutorForm" asp-action="CreateAutor" method="post">
                     <div class="form-group">
                         <label for="Nombres">Nombres</label>
-                        <input type="text" class="form-control" id="Nombres" />
+                        <input type="text" class="form-control" name="Nombres" required />
                     </div>
                     <div class="form-group">
                         <label for="Apellidos">Apellidos</label>
-                        <input type="text" class="form-control" id="Apellidos" />
+                        <input type="text" class="form-control" name="Apellidos" required />
                     </div>
                     <div class="form-group">
                         <label for="Nacionalidad">Nacionalidad</label>
-                        <input type="text" class="form-control" id="Nacionalidad" />
+                        <input type="text" class="form-control" name="Nacionalidad" required />
                     </div>
                     <br />
                     <button type="submit" class="btn btn-create"><i class="fas fa-save"></i> Guardar</button>
@@ -128,5 +87,7 @@
 
 @section Scripts {
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }

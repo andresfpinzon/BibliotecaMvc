@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BibliotecaWebApplicationMVC.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240815040708_initial")]
-    partial class initial
+    [Migration("20240815150456_publicaciones")]
+    partial class publicaciones
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -56,14 +56,11 @@ namespace BibliotecaWebApplicationMVC.Migrations
                     b.Property<Guid>("LibroId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("LibroPublicacionId")
-                        .HasColumnType("int");
-
                     b.HasKey("AutorId", "LibroId");
 
-                    b.HasIndex("LibroPublicacionId");
+                    b.HasIndex("LibroId");
 
-                    b.ToTable("AutorLibro");
+                    b.ToTable("AutorLibros");
                 });
 
             modelBuilder.Entity("BibliotecaWebApplicationMVC.Models.Ejemplar", b =>
@@ -77,8 +74,8 @@ namespace BibliotecaWebApplicationMVC.Migrations
                     b.Property<int>("EstanteId")
                         .HasColumnType("int");
 
-                    b.Property<int>("PublicacionId")
-                        .HasColumnType("int");
+                    b.Property<Guid>("PublicacionId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("EjemplarId");
 
@@ -130,19 +127,75 @@ namespace BibliotecaWebApplicationMVC.Migrations
                     b.ToTable("Estanterias");
                 });
 
-            modelBuilder.Entity("BibliotecaWebApplicationMVC.Models.Publicacion", b =>
+            modelBuilder.Entity("BibliotecaWebApplicationMVC.Models.Libro", b =>
                 {
-                    b.Property<int>("PublicacionId")
+                    b.Property<Guid>("LibroId")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Formato")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ISBN")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("NumeroPaginas")
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PublicacionId"));
+                    b.Property<Guid>("PublicacionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Titulo")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("LibroId");
+
+                    b.HasIndex("PublicacionId")
+                        .IsUnique();
+
+                    b.ToTable("Libros", (string)null);
+                });
+
+            modelBuilder.Entity("BibliotecaWebApplicationMVC.Models.Publicacion", b =>
+                {
+                    b.Property<Guid>("PublicacionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("PublicacionId");
 
-                    b.ToTable("Publicacion");
+                    b.ToTable("Publicaciones");
+                });
 
-                    b.UseTptMappingStrategy();
+            modelBuilder.Entity("BibliotecaWebApplicationMVC.Models.Revista", b =>
+                {
+                    b.Property<Guid>("RevistaId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("FechaPublicacion")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Nombre")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Numero")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("PublicacionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("RevistaId");
+
+                    b.HasIndex("PublicacionId")
+                        .IsUnique();
+
+                    b.ToTable("Revistas", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -340,48 +393,6 @@ namespace BibliotecaWebApplicationMVC.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("BibliotecaWebApplicationMVC.Models.Libro", b =>
-                {
-                    b.HasBaseType("BibliotecaWebApplicationMVC.Models.Publicacion");
-
-                    b.Property<string>("ISBN")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("LibroId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("NumeroPaginas")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Titulo")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.ToTable("Libros", (string)null);
-                });
-
-            modelBuilder.Entity("BibliotecaWebApplicationMVC.Models.Revista", b =>
-                {
-                    b.HasBaseType("BibliotecaWebApplicationMVC.Models.Publicacion");
-
-                    b.Property<DateTime>("FechaPublicacion")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Nombre")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Numero")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("RevistaId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.ToTable("Revistas", (string)null);
-                });
-
             modelBuilder.Entity("BibliotecaWebApplicationMVC.Models.AutorLibro", b =>
                 {
                     b.HasOne("BibliotecaWebApplicationMVC.Models.Autor", "Autor")
@@ -392,7 +403,7 @@ namespace BibliotecaWebApplicationMVC.Migrations
 
                     b.HasOne("BibliotecaWebApplicationMVC.Models.Libro", "Libro")
                         .WithMany("AutorLibros")
-                        .HasForeignKey("LibroPublicacionId")
+                        .HasForeignKey("LibroId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -429,6 +440,28 @@ namespace BibliotecaWebApplicationMVC.Migrations
                         .IsRequired();
 
                     b.Navigation("Estanteria");
+                });
+
+            modelBuilder.Entity("BibliotecaWebApplicationMVC.Models.Libro", b =>
+                {
+                    b.HasOne("BibliotecaWebApplicationMVC.Models.Publicacion", "Publicacion")
+                        .WithOne()
+                        .HasForeignKey("BibliotecaWebApplicationMVC.Models.Libro", "PublicacionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Publicacion");
+                });
+
+            modelBuilder.Entity("BibliotecaWebApplicationMVC.Models.Revista", b =>
+                {
+                    b.HasOne("BibliotecaWebApplicationMVC.Models.Publicacion", "Publicacion")
+                        .WithOne()
+                        .HasForeignKey("BibliotecaWebApplicationMVC.Models.Revista", "PublicacionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Publicacion");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -482,24 +515,6 @@ namespace BibliotecaWebApplicationMVC.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("BibliotecaWebApplicationMVC.Models.Libro", b =>
-                {
-                    b.HasOne("BibliotecaWebApplicationMVC.Models.Publicacion", null)
-                        .WithOne()
-                        .HasForeignKey("BibliotecaWebApplicationMVC.Models.Libro", "PublicacionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("BibliotecaWebApplicationMVC.Models.Revista", b =>
-                {
-                    b.HasOne("BibliotecaWebApplicationMVC.Models.Publicacion", null)
-                        .WithOne()
-                        .HasForeignKey("BibliotecaWebApplicationMVC.Models.Revista", "PublicacionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("BibliotecaWebApplicationMVC.Models.Autor", b =>
                 {
                     b.Navigation("AutorLibros");
@@ -515,14 +530,14 @@ namespace BibliotecaWebApplicationMVC.Migrations
                     b.Navigation("Estantes");
                 });
 
-            modelBuilder.Entity("BibliotecaWebApplicationMVC.Models.Publicacion", b =>
-                {
-                    b.Navigation("Ejemplares");
-                });
-
             modelBuilder.Entity("BibliotecaWebApplicationMVC.Models.Libro", b =>
                 {
                     b.Navigation("AutorLibros");
+                });
+
+            modelBuilder.Entity("BibliotecaWebApplicationMVC.Models.Publicacion", b =>
+                {
+                    b.Navigation("Ejemplares");
                 });
 #pragma warning restore 612, 618
         }

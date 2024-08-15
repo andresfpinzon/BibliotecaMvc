@@ -21,14 +21,14 @@ namespace BibliotecaWebApplicationMVC.Controllers
         }
 
         // GET: Autores
-        [Authorize(Roles ="Bibliotecario, Administrador")]
+        [Authorize(Roles ="Bibliotecario, Administrador, Root")]
         public async Task<IActionResult> Index()
         {
             return View(await _context.Autores.ToListAsync());
         }
 
         // GET: Autores/Details/5
-        [Authorize(Roles = "Bibliotecario, Administrador")]
+        [Authorize(Roles = "Bibliotecario, Administrador, Root")]
         public async Task<IActionResult> Details(Guid? id)
         {
             if (id == null)
@@ -47,7 +47,7 @@ namespace BibliotecaWebApplicationMVC.Controllers
         }
 
         // GET: Autores/Create
-        [Authorize(Roles = "Administrador, Bibliotecario")]
+        [Authorize(Roles = "Bibliotecario, Administrador, Root\"")]
         public IActionResult Create()
         {
             return View();
@@ -58,7 +58,7 @@ namespace BibliotecaWebApplicationMVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Administrador")]
+        [Authorize(Roles = "Bibliotecario, Administrador, Root")]
         public async Task<IActionResult> Create([Bind("AutorId,Nombres,Apellidos,Nacionalidad")] Autor autor)
         {
             if (ModelState.IsValid)
@@ -72,7 +72,7 @@ namespace BibliotecaWebApplicationMVC.Controllers
         }
 
         // GET: Autores/Edit/5
-        [Authorize(Roles = "Administrador")]
+        [Authorize(Roles = "Bibliotecario, Administrador, Root")]
         public async Task<IActionResult> Edit(Guid? id)
         {
             if (id == null)
@@ -93,7 +93,7 @@ namespace BibliotecaWebApplicationMVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Administrador")]
+        [Authorize(Roles = "Bibliotecario, Administrador, Root")]
         public async Task<IActionResult> Edit(Guid id, [Bind("AutorId,Nombres,Apellidos,Nacionalidad")] Autor autor)
         {
             if (id != autor.AutorId)
@@ -125,7 +125,7 @@ namespace BibliotecaWebApplicationMVC.Controllers
         }
 
         // GET: Autores/Delete/5
-        [Authorize(Roles = "Administrador")]
+        [Authorize(Roles = "Bibliotecario, Administrador, Root")]
         public async Task<IActionResult> Delete(Guid? id)
         {
             if (id == null)
@@ -146,7 +146,7 @@ namespace BibliotecaWebApplicationMVC.Controllers
         // POST: Autores/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Administrador")]
+        [Authorize(Roles = "Bibliotecario, Administrador, Root")]
         public async Task<IActionResult> DeleteConfirmed(Guid id)
         {
             var autor = await _context.Autores.FindAsync(id);

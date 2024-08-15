@@ -2,10 +2,15 @@
 
 namespace BibliotecaWebApplicationMVC.Models
 {
-    public abstract class Publicacion
+    public class Publicacion
     {
         [Key]
-        public int PublicacionId { get; set; }
+        public Guid PublicacionId { get; set; }
+
+        public Publicacion()
+        {
+            this.PublicacionId = Guid.NewGuid();
+        }
 
         // Navigation properties
         public ICollection<Ejemplar> Ejemplares { get; set; } = new List<Ejemplar>();
