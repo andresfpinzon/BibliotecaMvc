@@ -47,7 +47,7 @@ namespace BibliotecaWebApplicationMVC.Controllers
         }
 
         // GET: Autores/Create
-        [Authorize(Roles = "Bibliotecario, Administrador, Root\"")]
+        [Authorize(Roles = "Bibliotecario, Administrador, Root")]
         public IActionResult Create()
         {
             return View();
