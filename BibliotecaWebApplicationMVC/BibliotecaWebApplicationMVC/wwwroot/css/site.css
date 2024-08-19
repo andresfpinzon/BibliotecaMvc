@@ -76,13 +76,6 @@ html {
 }
 /*Estilos para header y footer  */
 
-.navbar li:hover a {
-    background: black;
-    border-radius: 10%;
-    color: whitesmoke !important;
-    font-weight: 900;
-}
-
 footer {
     background-color: white; 
     color: black; 

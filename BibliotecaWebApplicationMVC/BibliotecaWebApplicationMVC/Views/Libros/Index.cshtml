@@ -21,28 +21,42 @@
             <th>
                 @Html.DisplayNameFor(model => model.NumeroPaginas)
             </th>
+            <th>Formato</th>
+            <th>Autores</th>
             <th></th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.ISBN)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Titulo)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.NumeroPaginas)
-            </td>
-            <td>
-                    <a asp-action="Edit" asp-route-id="@item.LibroId" class="btn btn btn-edit btn-sm "><i class="fas fa-edit"></i> Editar</a>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ISBN)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Titulo)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.NumeroPaginas)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Formato)
+                </td>
+                <td>
+                    @foreach (var autorLibro in item.AutorLibros)
+                    {
+                        var autor = autorLibro.Autor;
+                        <span>@autor.Nombres @autor.Apellidos</span>
+                        <br />
+                    }
+                </td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.LibroId" class="btn btn btn-edit btn-sm"><i class="fas fa-edit"></i> Editar</a>
                     <a asp-action="Details" asp-route-id="@item.LibroId" class="btn btn-details btn-sm"><i class="fas fa-info-circle"></i> Detalles</a>
                     <a asp-action="Delete" asp-route-id="@item.LibroId" class="btn btn btn-delete btn-sm"><i class="fas fa-trash-alt"></i> Eliminar</a>
-            </td>
-        </tr>
-}
+                </td>
+            </tr>
+        }
     </tbody>
 </table>
 

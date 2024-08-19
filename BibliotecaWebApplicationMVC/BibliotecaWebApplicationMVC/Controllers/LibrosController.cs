@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using BibliotecaWebApplicationMVC.Data;
 using BibliotecaWebApplicationMVC.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BibliotecaWebApplicationMVC.Controllers
 {
@@ -20,12 +20,18 @@ namespace BibliotecaWebApplicationMVC.Controllers
         }
 
         // GET: Libros
+        [Authorize(Roles = "Bibliotecario, Administrador")]
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Libros.ToListAsync());
+            var libros = await _context.Libros
+                .Include(l => l.AutorLibros)
+                    .ThenInclude(al => al.Autor)
+                .ToListAsync();
+            return View(libros);
         }
 
         // GET: Libros/Details/5
+        [Authorize(Roles = "Bibliotecario, Administrador")]
         public async Task<IActionResult> Details(Guid? id)
         {
             if (id == null)
@@ -34,6 +40,8 @@ namespace BibliotecaWebApplicationMVC.Controllers
             }
 
             var libro = await _context.Libros
+                .Include(l => l.AutorLibros)
+                    .ThenInclude(al => al.Autor)
                 .FirstOrDefaultAsync(m => m.LibroId == id);
             if (libro == null)
             {
@@ -44,29 +52,94 @@ namespace BibliotecaWebApplicationMVC.Controllers
         }
 
         // GET: Libros/Create
+        [Authorize(Roles = "Administrador")]
         public IActionResult Create()
         {
+            ViewBag.Autores = _context.Autores.ToList();
             return View();
         }
 
         // POST: Libros/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("LibroId,ISBN,Titulo,NumeroPaginas")] Libro libro)
+        [Authorize(Roles = "Administrador")]
+        public async Task<IActionResult> Create([Bind("LibroId,ISBN,Titulo,NumeroPaginas,Formato,PortadaUrl,ContraportadaUrl")] Libro libro, IFormFile portada, IFormFile contraportada, Guid[] selectedAutores)
         {
-            if (ModelState.IsValid)
+            //if (ModelState.IsValid)
             {
+                var publicacion = new Publicacion
+                {
+                    PublicacionId = Guid.NewGuid()
+                };
+
+                _context.Publicaciones.Add(publicacion);
+                await _context.SaveChangesAsync();
+
+                libro.PublicacionId = publicacion.PublicacionId;
                 libro.LibroId = Guid.NewGuid();
+
+                if (portada != null && portada.Length > 0)
+                {
+                    var portadaFileName = Path.GetFileName(portada.FileName);
+                    var portadaFilePath = Path.Combine("wwwroot/images/libros", portadaFileName);
+
+                    using (var stream = new FileStream(portadaFilePath, FileMode.Create))
+                    {
+                        await portada.CopyToAsync(stream);
+                    }
+
+                    libro.PortadaUrl = "/images/libros/" + portadaFileName;
+                }
+                else
+                {
+                    libro.PortadaUrl = "/images/libros/portadaDefecto.png"; // Imagen predeterminada
+                }
+
+                if (contraportada != null && contraportada.Length > 0)
+                {
+                    var contraportadaFileName = Path.GetFileName(contraportada.FileName);
+                    var contraportadaFilePath = Path.Combine("wwwroot/images/libros", contraportadaFileName);
+
+                    using (var stream = new FileStream(contraportadaFilePath, FileMode.Create))
+                    {
+                        await contraportada.CopyToAsync(stream);
+                    }
+
+                    libro.ContraportadaUrl = "/images/libros/" + contraportadaFileName;
+                }
+                else
+                {
+                    libro.ContraportadaUrl = "/images/libros/portadaDefecto.png"; // Imagen predeterminada
+                }
+
                 _context.Add(libro);
                 await _context.SaveChangesAsync();
+
+                if (selectedAutores != null)
+                {
+                    foreach (var autorId in selectedAutores)
+                    {
+                        var autorLibro = new AutorLibro
+                        {
+                            AutorId = autorId,
+                            LibroId = libro.LibroId
+                        };
+                        _context.AutorLibros.Add(autorLibro);
+                    }
+                    await _context.SaveChangesAsync();
+                }
+
                 return RedirectToAction(nameof(Index));
             }
+
+            ViewBag.Autores = _context.Autores.ToList();
             return View(libro);
         }
 
+
+
         // GET: Libros/Edit/5
+        [Authorize(Roles = "Administrador")]
         public async Task<IActionResult> Edit(Guid? id)
         {
             if (id == null)
@@ -74,32 +147,97 @@ namespace BibliotecaWebApplicationMVC.Controllers
                 return NotFound();
             }
 
-            var libro = await _context.Libros.FindAsync(id);
+            var libro = await _context.Libros
+                .Include(l => l.Publicacion)
+                .Include(l => l.AutorLibros)
+                    .ThenInclude(al => al.Autor)
+                .FirstOrDefaultAsync(m => m.LibroId == id);
+
             if (libro == null)
             {
                 return NotFound();
             }
+
+            ViewBag.Autores = _context.Autores.ToList();
+            ViewBag.SelectedAutores = libro.AutorLibros.Select(al => al.AutorId).ToList() ?? new List<Guid>();
+
             return View(libro);
         }
 
         // POST: Libros/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Guid id, [Bind("LibroId,ISBN,Titulo,NumeroPaginas")] Libro libro)
+        [Authorize(Roles = "Administrador")]
+        public async Task<IActionResult> Edit(Guid id, [Bind("LibroId,ISBN,Titulo,NumeroPaginas,Formato")] Libro libro, IFormFile portada, IFormFile contraportada, Guid[] selectedAutores)
         {
             if (id != libro.LibroId)
             {
                 return NotFound();
             }
 
-            if (ModelState.IsValid)
+            //if (ModelState.IsValid)
             {
                 try
                 {
-                    _context.Update(libro);
+                    var libroFromDb = await _context.Libros
+                        .Include(l => l.Publicacion)
+                        .FirstOrDefaultAsync(l => l.LibroId == id);
+
+                    if (libroFromDb == null)
+                    {
+                        return NotFound();
+                    }
+
+                    libroFromDb.ISBN = libro.ISBN;
+                    libroFromDb.Titulo = libro.Titulo;
+                    libroFromDb.NumeroPaginas = libro.NumeroPaginas;
+                    libroFromDb.Formato = libro.Formato;
+
+                    if (portada != null && portada.Length > 0)
+                    {
+                        var portadaFileName = Path.GetFileName(portada.FileName);
+                        var portadaFilePath = Path.Combine("wwwroot/images/libros", portadaFileName);
+
+                        using (var stream = new FileStream(portadaFilePath, FileMode.Create))
+                        {
+                            await portada.CopyToAsync(stream);
+                        }
+
+                        libroFromDb.PortadaUrl = "/images/libros/" + portadaFileName;
+                    }
+
+                    if (contraportada != null && contraportada.Length > 0)
+                    {
+                        var contraportadaFileName = Path.GetFileName(contraportada.FileName);
+                        var contraportadaFilePath = Path.Combine("wwwroot/images/libros", contraportadaFileName);
+
+                        using (var stream = new FileStream(contraportadaFilePath, FileMode.Create))
+                        {
+                            await contraportada.CopyToAsync(stream);
+                        }
+
+                        libroFromDb.ContraportadaUrl = "/images/libros/" + contraportadaFileName;
+                    }
+
+                    _context.Update(libroFromDb);
                     await _context.SaveChangesAsync();
+
+                    var existingAutorLibros = _context.AutorLibros.Where(al => al.LibroId == id);
+                    _context.AutorLibros.RemoveRange(existingAutorLibros);
+
+                    if (selectedAutores != null && selectedAutores.Any())
+                    {
+                        foreach (var autorId in selectedAutores)
+                        {
+                            var autorLibro = new AutorLibro
+                            {
+                                AutorId = autorId,
+                                LibroId = libro.LibroId
+                            };
+                            _context.AutorLibros.Add(autorLibro);
+                        }
+                        await _context.SaveChangesAsync();
+                    }
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -114,10 +252,22 @@ namespace BibliotecaWebApplicationMVC.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
+
+            ViewBag.Autores = _context.Autores.ToList();
+            ViewBag.SelectedAutores = selectedAutores != null ? selectedAutores.ToList() : new List<Guid>();
             return View(libro);
         }
 
+
+        private bool LibroExists(Guid id)
+        {
+            return _context.Libros.Any(e => e.LibroId == id);
+        }
+
+
+
         // GET: Libros/Delete/5
+        [Authorize(Roles = "Administrador")]
         public async Task<IActionResult> Delete(Guid? id)
         {
             if (id == null)
@@ -126,6 +276,8 @@ namespace BibliotecaWebApplicationMVC.Controllers
             }
 
             var libro = await _context.Libros
+                .Include(l => l.AutorLibros)
+                    .ThenInclude(al => al.Autor)
                 .FirstOrDefaultAsync(m => m.LibroId == id);
             if (libro == null)
             {
@@ -135,24 +287,40 @@ namespace BibliotecaWebApplicationMVC.Controllers
             return View(libro);
         }
 
-        // POST: Libros/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Administrador")]
         public async Task<IActionResult> DeleteConfirmed(Guid id)
         {
-            var libro = await _context.Libros.FindAsync(id);
+            var libro = await _context.Libros
+                .Include(l => l.AutorLibros)
+                .Include(l => l.Publicacion) // Incluye la Publicacion asociada
+                .FirstOrDefaultAsync(l => l.LibroId == id);
+
             if (libro != null)
             {
+                // Eliminar relaciones en AutorLibro
+                _context.AutorLibros.RemoveRange(libro.AutorLibros);
+
+                // Eliminar la publicacion asociada
+                if (libro.Publicacion != null)
+                {
+                    _context.Publicaciones.Remove(libro.Publicacion);
+                }
+
+                // Eliminar el libro
                 _context.Libros.Remove(libro);
+                await _context.SaveChangesAsync();
             }
 
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        private bool LibroExists(Guid id)
+        [AllowAnonymous]
+        public IActionResult AccessDenied()
         {
-            return _context.Libros.Any(e => e.LibroId == id);
+            return View();
         }
     }
 }
+

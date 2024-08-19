@@ -13,7 +13,11 @@ public static class IdentityDataInitializer
             var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
 
             await EnsureRoleAsync(roleManager, "Root");
-            await EnsureUserAsync(userManager, "superusuario@bibliotecasena.edu.co", "Bibl10t3c$3n@", "Root");
+            var configuration = serviceProvider.GetRequiredService<IConfiguration>();
+            var email = configuration["SuperUsuarioEmail"];
+            var password = configuration["SuperUsuarioPassword"];
+
+            await EnsureUserAsync(userManager, email, password, "Root");
         }
 
         private static async Task EnsureRoleAsync(RoleManager<IdentityRole> roleManager, string roleName)

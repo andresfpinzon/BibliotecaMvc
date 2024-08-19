@@ -20,6 +20,14 @@ builder.Services.AddIdentity<IdentityUser, IdentityRole>(options => options.Sign
 .AddEntityFrameworkStores<ApplicationDbContext>()
 .AddDefaultTokenProviders();
 
+//Error de Permisos 
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    // Aquí configuras la ruta de redirección cuando se niega el acceso
+    options.AccessDeniedPath = "/Autores/AccessDenied";
+
+});
+
 //Email Sender
 builder.Services.AddTransient<IEmailSender, EmailSender>();
 builder.Services.Configure<AuthMessageSenderOptions>(builder.Configuration);
@@ -40,6 +48,11 @@ using (var scope = app.Services.CreateScope())
     try
     {
         await IdentityDataInitializer.SeedData(services);
+        var context = services.GetRequiredService<ApplicationDbContext>();
+
+        // llamar al metodo seedAsync
+        await AutorLibroDataInitializer.SeedAsync(context);
+
     }
     catch (Exception ex)
     {

@@ -9,10 +9,8 @@ namespace BibliotecaWebApplicationMVC.Models
         public string Nombres { get; set; }
         public string Apellidos { get; set; }
         public string Nacionalidad { get; set; }
-
-        //[Url]
-        //public string FotoUrl { get; set; } 
-
+        // foto autor
+        public string? FotoUrl { get; set; }
         public Autor()
         {
             this.AutorId = Guid.NewGuid();
