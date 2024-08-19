@@ -4,13 +4,12 @@
     ViewData["Title"] = "Editar";
 }
 
-<h1>Editar</h1>
+<h1>Editar Libro</h1>
 
-<h4>Libro</h4>
 <hr />
 <div class="row">
     <div class="col-md-8">
-        <form asp-action="Edit">
+        <form asp-action="Edit" enctype="multipart/form-data">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" asp-for="LibroId" />
             <div class="form-group">

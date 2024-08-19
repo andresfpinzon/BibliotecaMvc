@@ -7,6 +7,7 @@ namespace BibliotecaWebApplicationMVC.Models
         [Key]
         public int EstanteId { get; set; }
         public string CodigoEstante { get; set; }
+        // Fk Estanteria
         public int? EstanteriaId { get; set; }
 
         // Navigation properties

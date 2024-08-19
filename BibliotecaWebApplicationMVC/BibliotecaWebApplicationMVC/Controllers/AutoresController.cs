@@ -57,10 +57,6 @@ namespace BibliotecaWebApplicationMVC.Controllers
             return View();
         }
 
-        // POST: Autores/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        // POST: Autores/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Administrador")]
@@ -80,14 +76,29 @@ namespace BibliotecaWebApplicationMVC.Controllers
 
                     autor.FotoUrl = "/images/autores/" + fileName;  // Almacena la URL de la foto
                 }
+                else
+                {
+                    autor.FotoUrl = "/images/autores/Defecto.png"; 
+                }
 
                 autor.AutorId = Guid.NewGuid();
                 _context.Add(autor);
                 await _context.SaveChangesAsync();
+
+                // Detectar si la solicitud es AJAX
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                {
+                    // Retornar un resultado JSON con los detalles del nuevo autor
+                    return Json(new { success = true, autor });
+                }
+
                 return RedirectToAction(nameof(Index));
             }
+
             return View(autor);
         }
+
+
 
 
         // GET: Autores/Edit/5

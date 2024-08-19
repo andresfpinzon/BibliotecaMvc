@@ -5,8 +5,6 @@
 }
 
 <h1>Crear Libro</h1>
-
-<h4>Libro</h4>
 <hr />
 <div class="row">
     <div class="col-md-8">
@@ -91,7 +89,7 @@
                 </button>
             </div>
             <div class="modal-body">
-                <form id="crearAutorForm" asp-action="CreateAutor" method="post">
+                <form id="crearAutorForm" asp-controller="Autores" asp-action="Create" method="post" enctype="multipart/form-data">
                     <div class="form-group">
                         <label for="Nombres">Nombres</label>
                         <input type="text" class="form-control" name="Nombres" required />
@@ -104,6 +102,10 @@
                         <label for="Nacionalidad">Nacionalidad</label>
                         <input type="text" class="form-control" name="Nacionalidad" required />
                     </div>
+                    <div class="form-group">
+                        <label for="Foto">Foto</label>
+                        <input type="file" class="form-control" name="foto" />
+                    </div>
                     <br />
                     <button type="submit" class="btn btn-create"><i class="fas fa-save"></i> Guardar</button>
                 </form>
@@ -111,6 +113,7 @@
         </div>
     </div>
 </div>
+
 
 @section Scripts {
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
@@ -133,6 +136,45 @@
                 }
             });
         });
+
+        $(document).ready(function () {
+            $('#crearAutorForm').submit(function (e) {
+                e.preventDefault(); // Previene el envío tradicional del formulario
+                var formData = new FormData(this);
+                $.ajax({
+                    url: '@Url.Action("Create", "Autores")',
+                    type: 'POST',
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    success: function (result) {
+                        if (result.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Éxito',
+                                text: 'Autor creado correctamente',
+                                showConfirmButton: true
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    // Cerrar el modal
+                                    $('#crearAutorModal').modal('hide');
+                                    // Recargar la página solo cuando se confirma la alerta
+                                    location.reload();
+                                }
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'warning',
+                                title: 'Error',
+                                text: 'El Autor no se ah creado correctamente',
+                                showConfirmButton: true
+                            })
+                        }
+                    }
+                });
+            });
+        });
+
 
 
     </script>

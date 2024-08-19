@@ -6,7 +6,6 @@
 
 <h1>Crear Estante</h1>
 
-<h4>Estante</h4>
 <hr />
 <div class="row">
     <div class="col-md-4">
@@ -21,6 +20,7 @@
                 <label asp-for="EstanteriaId" class="control-label"></label>
                 <select asp-for="EstanteriaId" class="form-control" asp-items="ViewBag.EstanteriaId"></select>
             </div>
+            <br />
             <div class="form-group">
                 <button type="submit" class="btn btn-create"><i class="fas fa-save"></i> Crear</button>
                 <a asp-action="Index" class="btn btn-back"><i class="fas fa-arrow-left"></i> Volver</a>
@@ -29,9 +29,6 @@
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
 
 @section Scripts {
     @{

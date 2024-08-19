@@ -90,6 +90,10 @@ namespace BibliotecaWebApplicationMVC.Controllers
 
                     libro.PortadaUrl = "/images/libros/" + portadaFileName;
                 }
+                else
+                {
+                    libro.PortadaUrl = "/images/libros/portadaDefecto.png"; // Imagen predeterminada
+                }
 
                 if (contraportada != null && contraportada.Length > 0)
                 {
@@ -102,6 +106,10 @@ namespace BibliotecaWebApplicationMVC.Controllers
                     }
 
                     libro.ContraportadaUrl = "/images/libros/" + contraportadaFileName;
+                }
+                else
+                {
+                    libro.ContraportadaUrl = "/images/libros/portadaDefecto.png"; // Imagen predeterminada
                 }
 
                 _context.Add(libro);
@@ -306,27 +314,6 @@ namespace BibliotecaWebApplicationMVC.Controllers
             }
 
             return RedirectToAction(nameof(Index));
-        }
-
-
-
-        // Método para crear un nuevo autor
-        [HttpPost]
-        [Authorize(Roles = "Administrador")]
-        public async Task<IActionResult> CreateAutor(Autor autor)
-        {
-            if (ModelState.IsValid)
-            {
-                if (string.IsNullOrEmpty(autor.FotoUrl))
-                {
-                    autor.FotoUrl = "/images/autores/Defecto.jpg"; // Ruta de la imagen por defecto
-                }
-                autor.AutorId = Guid.NewGuid();
-                _context.Autores.Add(autor);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Create));
-            }
-            return View(autor);
         }
 
         [AllowAnonymous]
