@@ -10,10 +10,10 @@ namespace BibliotecaWebApplicationMVC.Models
         public string Titulo { get; set; }
         public string Formato { get; set; }
         public int NumeroPaginas { get; set; }
-
-
         public Guid? PublicacionId { get; set; }
         public Publicacion Publicacion { get; set; }
+        public string PortadaUrl { get; set; }
+        public string ContraportadaUrl { get; set; }
 
         public Libro()
         {

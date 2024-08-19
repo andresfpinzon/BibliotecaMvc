@@ -34,6 +34,28 @@
                 <span asp-validation-for="NumeroPaginas" class="text-danger"></span>
             </div>
 
+            <div class="form-group">
+                
+                @if (Model.PortadaUrl != null)
+                {
+                    <label for="PortadaUrl" class="control-label">Portada</label>
+                    <p><img src="@Model.PortadaUrl" alt="Portada" style="max-width: 200px;" /></p>
+                }
+                <label for="PortadaUrl" class="control-label">Nueva Portada</label>
+                <input type="file" class="form-control" name="portada" />
+            </div>
+            <br />
+            <div class="form-group">
+                
+                @if (Model.ContraportadaUrl != null)
+                {
+                    <label for="ContraportadaUrl" class="control-label">Contraportada</label>
+                    <p><img src="@Model.ContraportadaUrl" alt="Contraportada" style="max-width: 200px;" /></p>
+                }
+                <label for="ContraportadaUrl" class="control-label">Nueva Contraportada</label>
+                <input type="file" class="form-control" name="contraportada" />
+            </div>
+            <br />
             <h4>Seleccionar Autor(es)</h4>
             <table id="dataTable" class="table">
                 <thead>

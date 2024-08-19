@@ -34,16 +34,38 @@
         <dd class="col-sm-10">
             @Html.DisplayFor(model => model.NumeroPaginas)
         </dd>
-        <dt class="col-sm-2">
-            Autores
-        </dt>
-@*         <dd class="col-sm-10">
-            @foreach (var autorLibro in Model.AutorLibros)
-            {
-                <span>@autorLibro.Autor.Nombres @autorLibro.Autor.Apellidos</span>
-                <br />
-            }
-        </dd> *@
+
+        <div>
+            <dt class="col-sm-2">
+                Portada
+            </dt>
+            <dd class="col-sm-10">
+                @if (Model.PortadaUrl != null)
+                {
+                    <img src="@Model.PortadaUrl" alt="Portada" style="max-width: 200px;" />
+                }
+                else
+                {
+                    <p>No hay portada disponible.</p>
+                }
+            </dd>
+        </div>
+        <br />
+        <div>
+            <dt class="col-sm-2">
+                Contraportada
+            </dt>
+            <dd class="col-sm-10">
+                @if (Model.ContraportadaUrl != null)
+                {
+                    <img src="@Model.ContraportadaUrl" alt="Contraportada" style="max-width: 200px;" />
+                }
+                else
+                {
+                    <p>No hay contraportada disponible.</p>
+                }
+            </dd>
+        </div>
     </dl>
 </div>
 <div>

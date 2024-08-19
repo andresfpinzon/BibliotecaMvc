@@ -63,30 +63,50 @@ namespace BibliotecaWebApplicationMVC.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Administrador")]
-        public async Task<IActionResult> Create([Bind("LibroId,ISBN,Titulo,NumeroPaginas,Formato")] Libro libro, Guid[] selectedAutores)
+        public async Task<IActionResult> Create([Bind("LibroId,ISBN,Titulo,NumeroPaginas,Formato,PortadaUrl,ContraportadaUrl")] Libro libro, IFormFile portada, IFormFile contraportada, Guid[] selectedAutores)
         {
             //if (ModelState.IsValid)
             {
-
-                // Crear una nueva publicación
                 var publicacion = new Publicacion
                 {
                     PublicacionId = Guid.NewGuid()
                 };
 
-                // Guardar la publicación
                 _context.Publicaciones.Add(publicacion);
                 await _context.SaveChangesAsync();
 
-                // Asignar la publicación al libro
                 libro.PublicacionId = publicacion.PublicacionId;
                 libro.LibroId = Guid.NewGuid();
 
-                // Guardar el libro
+                if (portada != null && portada.Length > 0)
+                {
+                    var portadaFileName = Path.GetFileName(portada.FileName);
+                    var portadaFilePath = Path.Combine("wwwroot/images/libros", portadaFileName);
+
+                    using (var stream = new FileStream(portadaFilePath, FileMode.Create))
+                    {
+                        await portada.CopyToAsync(stream);
+                    }
+
+                    libro.PortadaUrl = "/images/libros/" + portadaFileName;
+                }
+
+                if (contraportada != null && contraportada.Length > 0)
+                {
+                    var contraportadaFileName = Path.GetFileName(contraportada.FileName);
+                    var contraportadaFilePath = Path.Combine("wwwroot/images/libros", contraportadaFileName);
+
+                    using (var stream = new FileStream(contraportadaFilePath, FileMode.Create))
+                    {
+                        await contraportada.CopyToAsync(stream);
+                    }
+
+                    libro.ContraportadaUrl = "/images/libros/" + contraportadaFileName;
+                }
+
                 _context.Add(libro);
                 await _context.SaveChangesAsync();
 
-                // Guardar la relación AutorLibro
                 if (selectedAutores != null)
                 {
                     foreach (var autorId in selectedAutores)
@@ -107,6 +127,7 @@ namespace BibliotecaWebApplicationMVC.Controllers
             ViewBag.Autores = _context.Autores.ToList();
             return View(libro);
         }
+
 
 
         // GET: Libros/Edit/5
@@ -139,7 +160,7 @@ namespace BibliotecaWebApplicationMVC.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Administrador")]
-        public async Task<IActionResult> Edit(Guid id, [Bind("LibroId,ISBN,Titulo,NumeroPaginas,Formato")] Libro libro, Guid[] selectedAutores)
+        public async Task<IActionResult> Edit(Guid id, [Bind("LibroId,ISBN,Titulo,NumeroPaginas,Formato")] Libro libro, IFormFile portada, IFormFile contraportada, Guid[] selectedAutores)
         {
             if (id != libro.LibroId)
             {
@@ -150,9 +171,8 @@ namespace BibliotecaWebApplicationMVC.Controllers
             {
                 try
                 {
-                    // Cargar el libro original desde la base de datos incluyendo la publicación
                     var libroFromDb = await _context.Libros
-                        .Include(l => l.Publicacion) // Asegura que Publicacion esté incluida
+                        .Include(l => l.Publicacion)
                         .FirstOrDefaultAsync(l => l.LibroId == id);
 
                     if (libroFromDb == null)
@@ -160,18 +180,40 @@ namespace BibliotecaWebApplicationMVC.Controllers
                         return NotFound();
                     }
 
-                    // Actualizar los campos que pueden cambiar
                     libroFromDb.ISBN = libro.ISBN;
                     libroFromDb.Titulo = libro.Titulo;
                     libroFromDb.NumeroPaginas = libro.NumeroPaginas;
                     libroFromDb.Formato = libro.Formato;
-                    // No actualizamos PublicacionId para evitar el conflicto de clave foránea
 
-                    // Guardar los cambios en el libro
+                    if (portada != null && portada.Length > 0)
+                    {
+                        var portadaFileName = Path.GetFileName(portada.FileName);
+                        var portadaFilePath = Path.Combine("wwwroot/images/libros", portadaFileName);
+
+                        using (var stream = new FileStream(portadaFilePath, FileMode.Create))
+                        {
+                            await portada.CopyToAsync(stream);
+                        }
+
+                        libroFromDb.PortadaUrl = "/images/libros/" + portadaFileName;
+                    }
+
+                    if (contraportada != null && contraportada.Length > 0)
+                    {
+                        var contraportadaFileName = Path.GetFileName(contraportada.FileName);
+                        var contraportadaFilePath = Path.Combine("wwwroot/images/libros", contraportadaFileName);
+
+                        using (var stream = new FileStream(contraportadaFilePath, FileMode.Create))
+                        {
+                            await contraportada.CopyToAsync(stream);
+                        }
+
+                        libroFromDb.ContraportadaUrl = "/images/libros/" + contraportadaFileName;
+                    }
+
                     _context.Update(libroFromDb);
                     await _context.SaveChangesAsync();
 
-                    // Actualizar la relación AutorLibro
                     var existingAutorLibros = _context.AutorLibros.Where(al => al.LibroId == id);
                     _context.AutorLibros.RemoveRange(existingAutorLibros);
 
@@ -207,6 +249,7 @@ namespace BibliotecaWebApplicationMVC.Controllers
             ViewBag.SelectedAutores = selectedAutores != null ? selectedAutores.ToList() : new List<Guid>();
             return View(libro);
         }
+
 
         private bool LibroExists(Guid id)
         {
@@ -274,6 +317,10 @@ namespace BibliotecaWebApplicationMVC.Controllers
         {
             if (ModelState.IsValid)
             {
+                if (string.IsNullOrEmpty(autor.FotoUrl))
+                {
+                    autor.FotoUrl = "/images/autores/Defecto.jpg"; // Ruta de la imagen por defecto
+                }
                 autor.AutorId = Guid.NewGuid();
                 _context.Autores.Add(autor);
                 await _context.SaveChangesAsync();
