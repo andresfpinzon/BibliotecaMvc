@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using BibliotecaWebApplicationMVC.Data;
 using BibliotecaWebApplicationMVC.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BibliotecaWebApplicationMVC.Controllers
 {
@@ -20,12 +21,14 @@ namespace BibliotecaWebApplicationMVC.Controllers
         }
 
         // GET: Estanterias
+        [Authorize(Roles = "Bibliotecario, Administrador")]
         public async Task<IActionResult> Index()
         {
             return View(await _context.Estanterias.ToListAsync());
         }
 
         // GET: Estanterias/Details/5
+        [Authorize(Roles = "Bibliotecario, Administrador")]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -44,6 +47,7 @@ namespace BibliotecaWebApplicationMVC.Controllers
         }
 
         // GET: Estanterias/Create
+        [Authorize(Roles = "Administrador")]
         public IActionResult Create()
         {
             return View();
@@ -66,6 +70,7 @@ namespace BibliotecaWebApplicationMVC.Controllers
         }
 
         // GET: Estanterias/Edit/5
+        [Authorize(Roles = "Administrador")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -86,6 +91,7 @@ namespace BibliotecaWebApplicationMVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Administrador")]
         public async Task<IActionResult> Edit(int id, [Bind("EstanteriaId,Alto,Ancho")] Estanteria estanteria)
         {
             if (id != estanteria.EstanteriaId)
@@ -117,6 +123,7 @@ namespace BibliotecaWebApplicationMVC.Controllers
         }
 
         // GET: Estanterias/Delete/5
+        [Authorize(Roles = "Administrador")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -137,6 +144,7 @@ namespace BibliotecaWebApplicationMVC.Controllers
         // POST: Estanterias/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Administrador")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var estanteria = await _context.Estanterias.FindAsync(id);
@@ -152,6 +160,12 @@ namespace BibliotecaWebApplicationMVC.Controllers
         private bool EstanteriaExists(int id)
         {
             return _context.Estanterias.Any(e => e.EstanteriaId == id);
+        }
+
+        [AllowAnonymous]
+        public IActionResult AccessDenied()
+        {
+            return View();
         }
     }
 }

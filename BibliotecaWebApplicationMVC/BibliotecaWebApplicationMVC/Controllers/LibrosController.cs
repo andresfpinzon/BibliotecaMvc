@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using BibliotecaWebApplicationMVC.Data;
 using BibliotecaWebApplicationMVC.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BibliotecaWebApplicationMVC.Controllers
 {
@@ -19,6 +20,7 @@ namespace BibliotecaWebApplicationMVC.Controllers
         }
 
         // GET: Libros
+        [Authorize(Roles = "Bibliotecario, Administrador")]
         public async Task<IActionResult> Index()
         {
             var libros = await _context.Libros
@@ -29,6 +31,7 @@ namespace BibliotecaWebApplicationMVC.Controllers
         }
 
         // GET: Libros/Details/5
+        [Authorize(Roles = "Bibliotecario, Administrador")]
         public async Task<IActionResult> Details(Guid? id)
         {
             if (id == null)
@@ -49,6 +52,7 @@ namespace BibliotecaWebApplicationMVC.Controllers
         }
 
         // GET: Libros/Create
+        [Authorize(Roles = "Administrador")]
         public IActionResult Create()
         {
             ViewBag.Autores = _context.Autores.ToList();
@@ -58,6 +62,7 @@ namespace BibliotecaWebApplicationMVC.Controllers
         // POST: Libros/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Administrador")]
         public async Task<IActionResult> Create([Bind("LibroId,ISBN,Titulo,NumeroPaginas,Formato")] Libro libro, Guid[] selectedAutores)
         {
             if (ModelState.IsValid)
@@ -105,6 +110,7 @@ namespace BibliotecaWebApplicationMVC.Controllers
 
 
         // GET: Libros/Edit/5
+        [Authorize(Roles = "Administrador")]
         public async Task<IActionResult> Edit(Guid? id)
         {
             if (id == null)
@@ -132,6 +138,7 @@ namespace BibliotecaWebApplicationMVC.Controllers
         // POST: Libros/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Administrador")]
         public async Task<IActionResult> Edit(Guid id, [Bind("LibroId,ISBN,Titulo,NumeroPaginas,Formato")] Libro libro, Guid[] selectedAutores)
         {
             if (id != libro.LibroId)
@@ -208,8 +215,9 @@ namespace BibliotecaWebApplicationMVC.Controllers
 
 
 
-    // GET: Libros/Delete/5
-    public async Task<IActionResult> Delete(Guid? id)
+        // GET: Libros/Delete/5
+        [Authorize(Roles = "Administrador")]
+        public async Task<IActionResult> Delete(Guid? id)
         {
             if (id == null)
             {
@@ -230,6 +238,7 @@ namespace BibliotecaWebApplicationMVC.Controllers
 
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Administrador")]
         public async Task<IActionResult> DeleteConfirmed(Guid id)
         {
             var libro = await _context.Libros
@@ -260,6 +269,7 @@ namespace BibliotecaWebApplicationMVC.Controllers
 
         // Método para crear un nuevo autor
         [HttpPost]
+        [Authorize(Roles = "Administrador")]
         public async Task<IActionResult> CreateAutor(Autor autor)
         {
             if (ModelState.IsValid)
@@ -270,6 +280,12 @@ namespace BibliotecaWebApplicationMVC.Controllers
                 return RedirectToAction(nameof(Create));
             }
             return View(autor);
+        }
+
+        [AllowAnonymous]
+        public IActionResult AccessDenied()
+        {
+            return View();
         }
     }
 }

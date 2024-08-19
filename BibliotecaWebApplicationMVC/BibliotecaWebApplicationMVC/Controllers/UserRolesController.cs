@@ -117,6 +117,11 @@ namespace BibliotecaWebApplicationMVC.Controllers
             return RedirectToAction("Index");
         }
 
+        [AllowAnonymous]
+        public IActionResult AccessDenied()
+        {
+            return View();
+        }
 
     }
 }

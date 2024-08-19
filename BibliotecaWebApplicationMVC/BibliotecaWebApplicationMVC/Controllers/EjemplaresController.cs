@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using BibliotecaWebApplicationMVC.Data;
 using BibliotecaWebApplicationMVC.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BibliotecaWebApplicationMVC.Controllers
 {
@@ -20,6 +21,7 @@ namespace BibliotecaWebApplicationMVC.Controllers
         }
 
         // GET: Ejemplares
+        [Authorize(Roles = "Bibliotecario, Administrador")]
         public async Task<IActionResult> Index()
         {
             var applicationDbContext = _context.Ejemplares.Include(e => e.Estante).Include(e => e.Publicacion);
@@ -27,6 +29,7 @@ namespace BibliotecaWebApplicationMVC.Controllers
         }
 
         // GET: Ejemplares/Details/5
+        [Authorize(Roles = "Bibliotecario, Administrador")]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -47,6 +50,7 @@ namespace BibliotecaWebApplicationMVC.Controllers
         }
 
         // GET: Ejemplares/Create
+        [Authorize(Roles = "Administrador")]
         public IActionResult Create()
         {
             ViewData["EstanteId"] = new SelectList(_context.Estantes, "EstanteId", "EstanteId");
@@ -59,6 +63,7 @@ namespace BibliotecaWebApplicationMVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Administrador")]
         public async Task<IActionResult> Create([Bind("EjemplarId,PublicacionId,EstanteId")] Ejemplar ejemplar)
         {
             //if (ModelState.IsValid)
@@ -73,6 +78,7 @@ namespace BibliotecaWebApplicationMVC.Controllers
         }
 
         // GET: Ejemplares/Edit/5
+        [Authorize(Roles = "Administrador")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -95,6 +101,7 @@ namespace BibliotecaWebApplicationMVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Administrador")]
         public async Task<IActionResult> Edit(int id, [Bind("EjemplarId,PublicacionId,EstanteId")] Ejemplar ejemplar)
         {
             if (id != ejemplar.EjemplarId)
@@ -128,6 +135,7 @@ namespace BibliotecaWebApplicationMVC.Controllers
         }
 
         // GET: Ejemplares/Delete/5
+        [Authorize(Roles = "Administrador")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -150,6 +158,7 @@ namespace BibliotecaWebApplicationMVC.Controllers
         // POST: Ejemplares/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Administrador")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var ejemplar = await _context.Ejemplares.FindAsync(id);
@@ -165,6 +174,12 @@ namespace BibliotecaWebApplicationMVC.Controllers
         private bool EjemplarExists(int id)
         {
             return _context.Ejemplares.Any(e => e.EjemplarId == id);
+        }
+
+        [AllowAnonymous]
+        public IActionResult AccessDenied()
+        {
+            return View();
         }
     }
 }

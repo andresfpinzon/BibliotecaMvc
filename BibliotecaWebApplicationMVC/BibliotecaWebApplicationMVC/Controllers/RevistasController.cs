@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using BibliotecaWebApplicationMVC.Data;
 using BibliotecaWebApplicationMVC.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BibliotecaWebApplicationMVC.Controllers
 {
@@ -20,6 +21,7 @@ namespace BibliotecaWebApplicationMVC.Controllers
         }
 
         // GET: Revistas
+        [Authorize(Roles = "Bibliotecario, Administrador")]
         public async Task<IActionResult> Index()
         {
             var applicationDbContext = _context.Revistas.Include(r => r.Publicacion);
@@ -27,6 +29,7 @@ namespace BibliotecaWebApplicationMVC.Controllers
         }
 
         // GET: Revistas/Details/5
+        [Authorize(Roles = "Bibliotecario, Administrador")]
         public async Task<IActionResult> Details(Guid? id)
         {
             if (id == null)
@@ -46,6 +49,7 @@ namespace BibliotecaWebApplicationMVC.Controllers
         }
 
         // GET: Revistas/Create
+        [Authorize(Roles = "Administrador")]
         public IActionResult Create()
         {
             return View();
@@ -56,6 +60,7 @@ namespace BibliotecaWebApplicationMVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Administrador")]
         public async Task<IActionResult> Create([Bind("RevistaId,Numero,Nombre,FechaPublicacion")] Revista revista)
         {
             //if (ModelState.IsValid)
@@ -84,6 +89,7 @@ namespace BibliotecaWebApplicationMVC.Controllers
         }
 
         // GET: Revistas/Edit/5
+        [Authorize(Roles = "Administrador")]
         public async Task<IActionResult> Edit(Guid? id)
         {
             if (id == null)
@@ -110,6 +116,7 @@ namespace BibliotecaWebApplicationMVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Administrador")]
         public async Task<IActionResult> Edit(Guid id, [Bind("RevistaId,Numero,Nombre,FechaPublicacion")] Revista revista)
         {
             if (id != revista.RevistaId)
@@ -155,6 +162,7 @@ namespace BibliotecaWebApplicationMVC.Controllers
 
 
         // GET: Revistas/Delete/5
+        [Authorize(Roles = "Administrador")]
         public async Task<IActionResult> Delete(Guid? id)
         {
             if (id == null)
@@ -175,6 +183,7 @@ namespace BibliotecaWebApplicationMVC.Controllers
 
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Administrador")]
         public async Task<IActionResult> DeleteConfirmed(Guid id)
         {
             var revista = await _context.Revistas
@@ -197,10 +206,15 @@ namespace BibliotecaWebApplicationMVC.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-
         private bool RevistaExists(Guid id)
         {
             return _context.Revistas.Any(e => e.RevistaId == id);
+        }
+
+        [AllowAnonymous]
+        public IActionResult AccessDenied()
+        {
+            return View();
         }
     }
 }
