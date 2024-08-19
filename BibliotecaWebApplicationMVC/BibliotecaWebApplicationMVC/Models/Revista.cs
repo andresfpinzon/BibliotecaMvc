@@ -11,7 +11,7 @@ namespace BibliotecaWebApplicationMVC.Models
         public DateTime FechaPublicacion { get; set; }
 
         // Clave foránea que referencia a Publicacion
-        public Guid PublicacionId { get; set; }
+        public Guid? PublicacionId { get; set; }
         public Publicacion Publicacion { get; set; }
 
         public Revista()

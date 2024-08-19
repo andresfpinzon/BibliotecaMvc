@@ -28,7 +28,7 @@ namespace BibliotecaWebApplicationMVC.Controllers
         }
 
         // GET: Autores/Details/5
-        [Authorize(Roles = "Bibliotecario, Administrador, Root")]
+        [Authorize(Roles = "Bibliotecario, Administrador")]
         public async Task<IActionResult> Details(Guid? id)
         {
             if (id == null)
@@ -37,7 +37,10 @@ namespace BibliotecaWebApplicationMVC.Controllers
             }
 
             var autor = await _context.Autores
+                .Include(a => a.AutorLibros) // Incluye los libros asociados al autor
+                .ThenInclude(al => al.Libro) // Incluye los detalles de los libros
                 .FirstOrDefaultAsync(m => m.AutorId == id);
+
             if (autor == null)
             {
                 return NotFound();
@@ -45,6 +48,7 @@ namespace BibliotecaWebApplicationMVC.Controllers
 
             return View(autor);
         }
+
 
         // GET: Autores/Create
         [Authorize(Roles = "Bibliotecario, Administrador, Root")]

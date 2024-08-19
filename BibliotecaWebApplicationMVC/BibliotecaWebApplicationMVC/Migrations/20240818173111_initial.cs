@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace BibliotecaWebApplicationMVC.Migrations
 {
     /// <inheritdoc />
-    public partial class Initial : Migration
+    public partial class initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -79,14 +79,14 @@ namespace BibliotecaWebApplicationMVC.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Publicacion",
+                name: "Publicaciones",
                 columns: table => new
                 {
                     PublicacionId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Publicacion", x => x.PublicacionId);
+                    table.PrimaryKey("PK_Publicaciones", x => x.PublicacionId);
                 });
 
             migrationBuilder.CreateTable(
@@ -202,7 +202,7 @@ namespace BibliotecaWebApplicationMVC.Migrations
                     EstanteId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     CodigoEstante = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    EstanteriaId = table.Column<int>(type: "int", nullable: false)
+                    EstanteriaId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -211,8 +211,7 @@ namespace BibliotecaWebApplicationMVC.Migrations
                         name: "FK_Estantes_Estanterias_EstanteriaId",
                         column: x => x.EstanteriaId,
                         principalTable: "Estanterias",
-                        principalColumn: "EstanteriaId",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "EstanteriaId");
                 });
 
             migrationBuilder.CreateTable(
@@ -224,17 +223,16 @@ namespace BibliotecaWebApplicationMVC.Migrations
                     Titulo = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Formato = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     NumeroPaginas = table.Column<int>(type: "int", nullable: false),
-                    PublicacionId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    PublicacionId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Libros", x => x.LibroId);
                     table.ForeignKey(
-                        name: "FK_Libros_Publicacion_PublicacionId",
+                        name: "FK_Libros_Publicaciones_PublicacionId",
                         column: x => x.PublicacionId,
-                        principalTable: "Publicacion",
-                        principalColumn: "PublicacionId",
-                        onDelete: ReferentialAction.Cascade);
+                        principalTable: "Publicaciones",
+                        principalColumn: "PublicacionId");
                 });
 
             migrationBuilder.CreateTable(
@@ -245,17 +243,16 @@ namespace BibliotecaWebApplicationMVC.Migrations
                     Numero = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Nombre = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     FechaPublicacion = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    PublicacionId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    PublicacionId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Revistas", x => x.RevistaId);
                     table.ForeignKey(
-                        name: "FK_Revistas_Publicacion_PublicacionId",
+                        name: "FK_Revistas_Publicaciones_PublicacionId",
                         column: x => x.PublicacionId,
-                        principalTable: "Publicacion",
-                        principalColumn: "PublicacionId",
-                        onDelete: ReferentialAction.Cascade);
+                        principalTable: "Publicaciones",
+                        principalColumn: "PublicacionId");
                 });
 
             migrationBuilder.CreateTable(
@@ -264,8 +261,8 @@ namespace BibliotecaWebApplicationMVC.Migrations
                 {
                     EjemplarId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    PublicacionId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    EstanteId = table.Column<int>(type: "int", nullable: false)
+                    PublicacionId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    EstanteId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -274,14 +271,12 @@ namespace BibliotecaWebApplicationMVC.Migrations
                         name: "FK_Ejemplares_Estantes_EstanteId",
                         column: x => x.EstanteId,
                         principalTable: "Estantes",
-                        principalColumn: "EstanteId",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "EstanteId");
                     table.ForeignKey(
-                        name: "FK_Ejemplares_Publicacion_PublicacionId",
+                        name: "FK_Ejemplares_Publicaciones_PublicacionId",
                         column: x => x.PublicacionId,
-                        principalTable: "Publicacion",
-                        principalColumn: "PublicacionId",
-                        onDelete: ReferentialAction.Cascade);
+                        principalTable: "Publicaciones",
+                        principalColumn: "PublicacionId");
                 });
 
             migrationBuilder.CreateTable(
@@ -366,13 +361,15 @@ namespace BibliotecaWebApplicationMVC.Migrations
                 name: "IX_Libros_PublicacionId",
                 table: "Libros",
                 column: "PublicacionId",
-                unique: true);
+                unique: true,
+                filter: "[PublicacionId] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Revistas_PublicacionId",
                 table: "Revistas",
                 column: "PublicacionId",
-                unique: true);
+                unique: true,
+                filter: "[PublicacionId] IS NOT NULL");
         }
 
         /// <inheritdoc />
@@ -418,7 +415,7 @@ namespace BibliotecaWebApplicationMVC.Migrations
                 name: "Estantes");
 
             migrationBuilder.DropTable(
-                name: "Publicacion");
+                name: "Publicaciones");
 
             migrationBuilder.DropTable(
                 name: "Estanterias");

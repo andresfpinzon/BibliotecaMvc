@@ -17,7 +17,7 @@ namespace BibliotecaWebApplicationMVC.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.7")
+                .HasAnnotation("ProductVersion", "8.0.8")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -68,10 +68,10 @@ namespace BibliotecaWebApplicationMVC.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("EjemplarId"));
 
-                    b.Property<int>("EstanteId")
+                    b.Property<int?>("EstanteId")
                         .HasColumnType("int");
 
-                    b.Property<Guid>("PublicacionId")
+                    b.Property<Guid?>("PublicacionId")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("EjemplarId");
@@ -95,7 +95,7 @@ namespace BibliotecaWebApplicationMVC.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("EstanteriaId")
+                    b.Property<int?>("EstanteriaId")
                         .HasColumnType("int");
 
                     b.HasKey("EstanteId");
@@ -141,7 +141,7 @@ namespace BibliotecaWebApplicationMVC.Migrations
                     b.Property<int>("NumeroPaginas")
                         .HasColumnType("int");
 
-                    b.Property<Guid>("PublicacionId")
+                    b.Property<Guid?>("PublicacionId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Titulo")
@@ -151,7 +151,8 @@ namespace BibliotecaWebApplicationMVC.Migrations
                     b.HasKey("LibroId");
 
                     b.HasIndex("PublicacionId")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasFilter("[PublicacionId] IS NOT NULL");
 
                     b.ToTable("Libros", (string)null);
                 });
@@ -184,13 +185,14 @@ namespace BibliotecaWebApplicationMVC.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("PublicacionId")
+                    b.Property<Guid?>("PublicacionId")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("RevistaId");
 
                     b.HasIndex("PublicacionId")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasFilter("[PublicacionId] IS NOT NULL");
 
                     b.ToTable("Revistas", (string)null);
                 });
@@ -413,15 +415,11 @@ namespace BibliotecaWebApplicationMVC.Migrations
                 {
                     b.HasOne("BibliotecaWebApplicationMVC.Models.Estante", "Estante")
                         .WithMany("Ejemplares")
-                        .HasForeignKey("EstanteId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("EstanteId");
 
                     b.HasOne("BibliotecaWebApplicationMVC.Models.Publicacion", "Publicacion")
                         .WithMany("Ejemplares")
-                        .HasForeignKey("PublicacionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("PublicacionId");
 
                     b.Navigation("Estante");
 
@@ -432,9 +430,7 @@ namespace BibliotecaWebApplicationMVC.Migrations
                 {
                     b.HasOne("BibliotecaWebApplicationMVC.Models.Estanteria", "Estanteria")
                         .WithMany("Estantes")
-                        .HasForeignKey("EstanteriaId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("EstanteriaId");
 
                     b.Navigation("Estanteria");
                 });
@@ -443,9 +439,7 @@ namespace BibliotecaWebApplicationMVC.Migrations
                 {
                     b.HasOne("BibliotecaWebApplicationMVC.Models.Publicacion", "Publicacion")
                         .WithOne()
-                        .HasForeignKey("BibliotecaWebApplicationMVC.Models.Libro", "PublicacionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("BibliotecaWebApplicationMVC.Models.Libro", "PublicacionId");
 
                     b.Navigation("Publicacion");
                 });
@@ -454,9 +448,7 @@ namespace BibliotecaWebApplicationMVC.Migrations
                 {
                     b.HasOne("BibliotecaWebApplicationMVC.Models.Publicacion", "Publicacion")
                         .WithOne()
-                        .HasForeignKey("BibliotecaWebApplicationMVC.Models.Revista", "PublicacionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("BibliotecaWebApplicationMVC.Models.Revista", "PublicacionId");
 
                     b.Navigation("Publicacion");
                 });
