@@ -65,7 +65,7 @@ namespace BibliotecaWebApplicationMVC.Controllers
         [Authorize(Roles = "Administrador")]
         public async Task<IActionResult> Create([Bind("LibroId,ISBN,Titulo,NumeroPaginas,Formato")] Libro libro, Guid[] selectedAutores)
         {
-            if (ModelState.IsValid)
+            //if (ModelState.IsValid)
             {
 
                 // Crear una nueva publicación

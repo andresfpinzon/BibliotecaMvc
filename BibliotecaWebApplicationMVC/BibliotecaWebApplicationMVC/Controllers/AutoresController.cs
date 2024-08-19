@@ -60,13 +60,27 @@ namespace BibliotecaWebApplicationMVC.Controllers
         // POST: Autores/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        // POST: Autores/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Administrador")]
-        public async Task<IActionResult> Create([Bind("AutorId,Nombres,Apellidos,Nacionalidad")] Autor autor)
+        public async Task<IActionResult> Create([Bind("AutorId,Nombres,Apellidos,Nacionalidad,FotoUrl")] Autor autor, IFormFile foto)
         {
-            if (ModelState.IsValid)
+            //if (ModelState.IsValid)
             {
+                if (foto != null && foto.Length > 0)
+                {
+                    var fileName = Path.GetFileName(foto.FileName);
+                    var filePath = Path.Combine("wwwroot/images/autores", fileName);
+
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await foto.CopyToAsync(stream);
+                    }
+
+                    autor.FotoUrl = "/images/autores/" + fileName;  // Almacena la URL de la foto
+                }
+
                 autor.AutorId = Guid.NewGuid();
                 _context.Add(autor);
                 await _context.SaveChangesAsync();
@@ -74,6 +88,7 @@ namespace BibliotecaWebApplicationMVC.Controllers
             }
             return View(autor);
         }
+
 
         // GET: Autores/Edit/5
         [Authorize(Roles = "Administrador")]
@@ -95,20 +110,40 @@ namespace BibliotecaWebApplicationMVC.Controllers
         // POST: Autores/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        // POST: Autores/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Administrador")]
-        public async Task<IActionResult> Edit(Guid id, [Bind("AutorId,Nombres,Apellidos,Nacionalidad")] Autor autor)
+        public async Task<IActionResult> Edit(Guid id, [Bind("AutorId,Nombres,Apellidos,Nacionalidad,FotoUrl")] Autor autor, IFormFile foto)
         {
             if (id != autor.AutorId)
             {
                 return NotFound();
             }
 
-            if (ModelState.IsValid)
+            //if (ModelState.IsValid)
             {
                 try
                 {
+                    var autorExistente = await _context.Autores.AsNoTracking().FirstOrDefaultAsync(a => a.AutorId == id);
+
+                    if (foto != null && foto.Length > 0)
+                    {
+                        var fileName = Path.GetFileName(foto.FileName);
+                        var filePath = Path.Combine("wwwroot/images/autores", fileName);
+
+                        using (var stream = new FileStream(filePath, FileMode.Create))
+                        {
+                            await foto.CopyToAsync(stream);
+                        }
+
+                        autor.FotoUrl = "/images/autores/" + fileName;  // Almacena la nueva URL de la foto
+                    }
+                    else
+                    {
+                        autor.FotoUrl = autorExistente?.FotoUrl;  // Mantiene la URL de la foto existente si no se carga una nueva
+                    }
+
                     _context.Update(autor);
                     await _context.SaveChangesAsync();
                 }
@@ -127,6 +162,8 @@ namespace BibliotecaWebApplicationMVC.Controllers
             }
             return View(autor);
         }
+
+
 
         // GET: Autores/Delete/5
         [Authorize(Roles = "Administrador")]
@@ -171,7 +208,7 @@ namespace BibliotecaWebApplicationMVC.Controllers
         [AllowAnonymous]
         public IActionResult AccessDenied()
         {
-            return View("AccessDenied");
+            return View();
         }
     }
 }
