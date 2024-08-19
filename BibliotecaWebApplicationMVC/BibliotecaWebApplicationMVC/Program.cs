@@ -40,6 +40,11 @@ using (var scope = app.Services.CreateScope())
     try
     {
         await IdentityDataInitializer.SeedData(services);
+        var context = services.GetRequiredService<ApplicationDbContext>();
+
+        // llamar al metodo seedAsync
+        await AutorLibroDataInitializer.SeedAsync(context);
+
     }
     catch (Exception ex)
     {

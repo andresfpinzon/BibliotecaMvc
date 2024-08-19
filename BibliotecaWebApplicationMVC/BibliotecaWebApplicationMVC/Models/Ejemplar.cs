@@ -7,8 +7,8 @@ namespace BibliotecaWebApplicationMVC.Models
     {
         [Key]
         public int EjemplarId { get; set; }
-        public Guid PublicacionId { get; set; }
-        public int EstanteId { get; set; }
+        public Guid? PublicacionId { get; set; }
+        public int? EstanteId { get; set; }
 
         // Navigation properties
         public Publicacion Publicacion { get; set; }

@@ -12,7 +12,7 @@ namespace BibliotecaWebApplicationMVC.Models
         public int NumeroPaginas { get; set; }
 
 
-        public Guid PublicacionId { get; set; }
+        public Guid? PublicacionId { get; set; }
         public Publicacion Publicacion { get; set; }
 
         public Libro()

@@ -37,15 +37,37 @@
         <dt class="col-sm-2">
             Autores
         </dt>
-        <dd class="col-sm-10">
+@*         <dd class="col-sm-10">
             @foreach (var autorLibro in Model.AutorLibros)
             {
                 <span>@autorLibro.Autor.Nombres @autorLibro.Autor.Apellidos</span>
                 <br />
             }
-        </dd>
+        </dd> *@
     </dl>
 </div>
+<div>
+    <h4>Autor(es):</h4>
+    @if (Model.AutorLibros.Any())
+    {
+        <ul class="list-group list-group-flush">
+            @foreach (var autorLibro in Model.AutorLibros)
+            {
+                <li class="list-group-item d-flex align-items-center">
+                    <i class="fas fa-user fa-2x text-primary me-2" title="Autor"></i>
+                    <span class="fw-semibold">
+                        @autorLibro.Autor.Nombres @autorLibro.Autor.Apellidos
+                    </span>
+                </li>
+            }
+        </ul>
+    }
+    else
+    {
+        <p>Este libro no tiene autores asociados.</p>
+    }
+</div>
+
 <div>
     <a asp-action="Edit" asp-route-id="@Model?.LibroId" class="btn btn-edit"><i class="fas fa-edit"></i> Editar</a>
     <a asp-action="Index" class="btn btn-back"><i class="fas fa-arrow-left"></i> Volver</a>

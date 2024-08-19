@@ -58,17 +58,10 @@ namespace BibliotecaWebApplicationMVC.Controllers
         // POST: Libros/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ISBN,Titulo,NumeroPaginas,Formato")] Libro libro, Guid[] selectedAutores)
+        public async Task<IActionResult> Create([Bind("LibroId,ISBN,Titulo,NumeroPaginas,Formato")] Libro libro, Guid[] selectedAutores)
         {
-            //if (ModelState.IsValid)
+            if (ModelState.IsValid)
             {
-                //var errors = ModelState.SelectMany(x => x.Value.Errors)
-                //           .Select(x => x.ErrorMessage).ToList();
-                // Aquí podrías hacer un `Debug.WriteLine(errors)` o pasar los errores a la vista para inspeccionarlos.
-                //foreach (var error in errors)
-                //{
-                //    Console.WriteLine(error); // O usa Debug.WriteLine si estás en Visual Studio
-                //}
 
                 // Crear una nueva publicación
                 var publicacion = new Publicacion
